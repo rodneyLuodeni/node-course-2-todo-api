@@ -18,16 +18,13 @@ const dummyTodos = [
         _id: new ObjectID(),
         text: 'third todo'
     }
-]
+];
 
 beforeEach((done) => {
-    Todo.remove({}).then( () => {
-        return Todo.insertMany(dummyTodos);
-        done();
-    }).then( () => {
-        done()
-    });
-});
+    Todo.remove({}).then(() => {
+      return Todo.insertMany(dummyTodos);
+    }).then(() => done());
+  });
 
 describe('POST/todos', () => {
     it('Should create a new todo', (done) => {
@@ -118,5 +115,50 @@ describe('GET /todo/:id', () => {
             .expect(404)
             .end(done);
     })
-    
+
 });
+
+
+    describe('DELETE /todos/:id', () => {
+
+        it('Should remove a todo', (done) => {
+            var hexId = dummyTodos[1]._id.toHexString();
+            request(app)
+                .delete(`/todo/${hexId}`)
+                .expect(200)
+                .expect((response) => {
+                    expect(response.body.result._id).toBe(hexId);
+                })
+                .end((error, response) => {
+                    if (error) {
+                        return done(error);
+                    }
+
+                    Todo.findById(hexId).then((todo) => {
+                        expect(todo).toBeNull();
+                        done();
+                    }).catch( (error) => {
+                        done(error);
+                    })
+
+                })
+        });
+
+        it('Should return a 404 if todo not found', (done) => {
+            request(app)
+                .delete(`todo/5a2eff93d1b3a029287553f8`)
+                .expect(404)
+                .end(() => {
+                    done();
+                });
+        });
+
+        it('Should return 404 if object id is invalid', (done) => {
+            request(app)
+                .delete(`todo/12345`)
+                .expect(404)
+                .end( () => {
+                    done();
+                });
+        });
+    })

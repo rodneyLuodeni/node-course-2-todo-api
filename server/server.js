@@ -66,16 +66,13 @@ app.delete('/todo/:id', (request, response) => {
             return response.status(404).send({statusText: "resource not found"});
         }
 
-        response.status(200).send({
-            statusText: "resource deleted successfully",
-            result: result
-        })
+        response.status(200).send({result })
 
     }, (error) => {
        return response.status(404).send({error: error });
     });
 
-})
+});
 
 
 app.listen(port, () => {
