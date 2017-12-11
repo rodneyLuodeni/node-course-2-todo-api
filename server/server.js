@@ -12,6 +12,8 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+
+// POST Todo
 app.post('/todos', (request, response) => {
     var todo = new Todo({
        text: request.body.text
@@ -53,7 +55,27 @@ app.get('/todo/:id', (request, response) => {
 });
 
 
+app.delete('/todo/:id', (request, response) => {
+    var id = request.params.id;
+    if (!ObjectID.isValid(id)) {
+        return response.status(404).send();
+    }
 
+    Todo.findByIdAndRemove(id).then( (result) => {
+        if (!result) {
+            return response.status(404).send({statusText: "resource not found"});
+        }
+
+        response.status(200).send({
+            statusText: "resource deleted successfully",
+            result: result
+        })
+
+    }, (error) => {
+       return response.status(404).send({error: error });
+    });
+
+})
 
 
 app.listen(port, () => {
